@@ -169,6 +169,27 @@ const RegisterPage = () => {
                 const errorMessages = result.error.errors.map((err) => err.message)
                 setAuthError(errorMessages.join(', '))
             }
+        } else if (isOpenSource) {
+            const result = RegisterCloudUserSchema.safeParse({
+                username,
+                email,
+                password,
+                confirmPassword
+            })
+            if (result.success) {
+                setLoading(true)
+                const body = {
+                    user: {
+                        name: username,
+                        email,
+                        credential: password
+                    }
+                }
+                await registerApi.request(body)
+            } else {
+                const errorMessages = result.error.errors.map((err) => err.message)
+                setAuthError(errorMessages.join(', '))
+            }
         }
     }
 
@@ -185,6 +206,10 @@ const RegisterPage = () => {
                 )
             } else if (isCloud) {
                 setAuthError(`Error in registering user. Please try again.`)
+            } else if (isOpenSource) {
+                setAuthError(
+                    `Error in registering user. ${registerApi.error?.response?.data?.message || 'Please try again.'}`
+                )
             }
             setLoading(false)
         }
@@ -239,6 +264,8 @@ const RegisterPage = () => {
                 setSuccessMsg('Registration Successful. You will be redirected to the sign in page shortly.')
             } else if (isCloud) {
                 setSuccessMsg('To complete your registration, please click on the verification link we sent to your email address')
+            } else if (isOpenSource) {
+                setSuccessMsg('Registration Successful. You will be redirected to the sign in page shortly.')
             }
             setTimeout(() => {
                 navigate('/signin')
